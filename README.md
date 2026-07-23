@@ -1,36 +1,83 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Pouporquinho
 
-## Getting Started
+Aplicativo de controle financeiro pessoal — lançamento de despesas e receitas, categorias, formas de pagamento (com fechamento/vencimento de fatura), orçamentos mensais, despesas recorrentes e dashboard com gráficos.
 
-First, run the development server:
+## Stack
+
+- **Frontend**: Next.js 16 (App Router) + TypeScript + Tailwind CSS + shadcn/ui (Base UI)
+- **Backend/Banco**: Supabase (Postgres + Auth), acessado diretamente do Next.js via Server Actions, com Row Level Security como camada de isolamento entre usuários
+- **Gráficos**: Recharts
+- **Validação**: Zod + react-hook-form
+- **Testes**: Vitest (lógica de fatura de cartão e regras de negócio puras)
+
+## Rodando localmente
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abra [http://localhost:3000](http://localhost:3000). A primeira tela pede login/cadastro (Supabase Auth).
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+As variáveis de ambiente já estão em `.env.local` (não versionado), apontando para o projeto Supabase `pouporquinho`. Para outro projeto Supabase, copie `.env.example` para `.env.local` e preencha:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```
+NEXT_PUBLIC_SUPABASE_URL=
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+```
 
-## Learn More
+## Banco de dados
 
-To learn more about Next.js, take a look at the following resources:
+As migrations ficam em `supabase/migrations/`, aplicadas em ordem numérica. Para rodar em outro projeto Supabase (via [Supabase CLI](https://supabase.com/docs/guides/local-development)):
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+```bash
+supabase link --project-ref <seu-project-ref>
+supabase db push
+```
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Depois, gere os tipos TypeScript atualizados:
 
-## Deploy on Vercel
+```bash
+supabase gen types typescript --project-id <seu-project-ref> > src/types/database.types.ts
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Antes de qualquer deploy, rode o linter de segurança/performance do Supabase (via MCP `get_advisors` ou `supabase db lint`) para checar RLS e políticas.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Testes e verificação
+
+```bash
+npm run lint        # ESLint
+npx tsc --noEmit     # type-check
+npm run test         # Vitest
+npm run build        # build de produção
+```
+
+## Deploy (Vercel)
+
+1. Suba o repositório para o GitHub.
+2. Importe o projeto na [Vercel](https://vercel.com/new).
+3. Configure as variáveis de ambiente (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`) no painel do projeto.
+4. Em **Supabase Auth → URL Configuration**, adicione a URL de produção da Vercel em *Site URL* e *Redirect URLs* (necessário para o fluxo de confirmação de email/magic link).
+5. Deploy.
+
+## Estrutura
+
+```
+src/
+  app/
+    (auth)/         # login, cadastro, callback de auth
+    (app)/          # rotas protegidas: dashboard, despesas, receitas, categorias,
+                     # formas de pagamento, orçamentos, recorrentes, configurações
+  actions/          # Server Actions (uma por domínio)
+  components/
+    ui/             # componentes shadcn/ui
+    forms/          # diálogos de formulário (react-hook-form + Zod)
+    layout/         # sidebar, nav mobile, topbar
+  lib/
+    supabase/       # clients browser/server
+    validations/    # schemas Zod
+    finance/        # cálculo de fatura, geração de recorrentes, formatação
+  proxy.ts          # guarda de rotas (equivalente ao middleware, renomeado no Next 16)
+supabase/
+  migrations/       # schema + RLS, em ordem
+```

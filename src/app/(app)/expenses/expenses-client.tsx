@@ -139,7 +139,12 @@ export function ExpensesClient({
           onValueChange={(value) => setCategoryFilter(value ?? ALL)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Categoria" />
+            <SelectValue placeholder="Categoria">
+              {(value: string) => {
+                if (value === ALL || !value) return "Todas as categorias";
+                return categoryById.get(value)?.name ?? "Todas as categorias";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todas as categorias</SelectItem>
@@ -156,7 +161,12 @@ export function ExpensesClient({
           onValueChange={(value) => setPaymentMethodFilter(value ?? ALL)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Forma de pagamento" />
+            <SelectValue placeholder="Forma de pagamento">
+              {(value: string) => {
+                if (value === ALL || !value) return "Todas as formas";
+                return paymentMethodById.get(value)?.name ?? "Todas as formas";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todas as formas</SelectItem>

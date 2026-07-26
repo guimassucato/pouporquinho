@@ -113,7 +113,9 @@ export function CategoryFormDialog({
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: string) => (value === "income" ? "Receita" : "Despesa")}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="expense">Despesa</SelectItem>

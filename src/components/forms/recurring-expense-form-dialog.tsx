@@ -172,7 +172,19 @@ export function RecurringExpenseFormDialog({
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Selecione">
+                      {(value: string) => {
+                        const category = categories.find((c) => c.id === value);
+                        if (!category) return "Selecione";
+                        const Icon = getCategoryIcon(category.icon);
+                        return (
+                          <>
+                            <Icon className="size-4" style={{ color: category.color }} />
+                            {category.name}
+                          </>
+                        );
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {categories.map((category) => {
@@ -201,7 +213,19 @@ export function RecurringExpenseFormDialog({
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Selecione">
+                      {(value: string) => {
+                        const pm = paymentMethods.find((p) => p.id === value);
+                        if (!pm) return "Selecione";
+                        const Icon = getPaymentMethodIcon(pm.icon);
+                        return (
+                          <>
+                            <Icon className="size-4" style={{ color: pm.color }} />
+                            {pm.name}
+                          </>
+                        );
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {paymentMethods.map((pm) => {

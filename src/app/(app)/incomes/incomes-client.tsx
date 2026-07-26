@@ -129,7 +129,12 @@ export function IncomesClient({
           onValueChange={(value) => setCategoryFilter(value ?? ALL)}
         >
           <SelectTrigger>
-            <SelectValue placeholder="Categoria" />
+            <SelectValue placeholder="Categoria">
+              {(value: string) => {
+                if (value === ALL || !value) return "Todas as categorias";
+                return categoryById.get(value)?.name ?? "Todas as categorias";
+              }}
+            </SelectValue>
           </SelectTrigger>
           <SelectContent>
             <SelectItem value={ALL}>Todas as categorias</SelectItem>

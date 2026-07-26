@@ -152,7 +152,20 @@ export function IncomeFormDialog({
                   }
                 >
                   <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Selecione" />
+                    <SelectValue placeholder="Selecione">
+                      {(value: string) => {
+                        if (value === NONE || !value) return "Sem categoria";
+                        const category = categories.find((c) => c.id === value);
+                        if (!category) return "Selecione";
+                        const Icon = getCategoryIcon(category.icon);
+                        return (
+                          <>
+                            <Icon className="size-4" style={{ color: category.color }} />
+                            {category.name}
+                          </>
+                        );
+                      }}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value={NONE}>Sem categoria</SelectItem>

@@ -141,7 +141,9 @@ export function PaymentMethodFormDialog({
               render={({ field }) => (
                 <Select value={field.value} onValueChange={field.onChange}>
                   <SelectTrigger className="w-full">
-                    <SelectValue />
+                    <SelectValue>
+                      {(value: PaymentMethodInput["kind"]) => KIND_LABELS[value]}
+                    </SelectValue>
                   </SelectTrigger>
                   <SelectContent>
                     {Object.entries(KIND_LABELS).map(([value, label]) => (

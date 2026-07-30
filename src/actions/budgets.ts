@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { userOwnsRow } from "@/lib/supabase/ownership";
 import { budgetSchema } from "@/lib/validations/budgets";
 
 export type ActionResult = { error: string } | { success: true };
@@ -17,6 +18,10 @@ export async function createBudget(input: unknown): Promise<ActionResult> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Não autenticado" };
+
+  if (!(await userOwnsRow(supabase, "categories", parsed.data.categoryId, user.id))) {
+    return { error: "Categoria inválida" };
+  }
 
   const { error } = await supabase.from("budgets").insert({
     category_id: parsed.data.categoryId,
@@ -53,6 +58,10 @@ export async function updateBudget(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Não autenticado" };
+
+  if (!(await userOwnsRow(supabase, "categories", parsed.data.categoryId, user.id))) {
+    return { error: "Categoria inválida" };
+  }
 
   const { error } = await supabase
     .from("budgets")

@@ -48,7 +48,7 @@ export default function SignupPage() {
               name="password"
               type="password"
               autoComplete="new-password"
-              minLength={6}
+              minLength={8}
               required
             />
           </div>

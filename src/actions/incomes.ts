@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { userOwnsRow } from "@/lib/supabase/ownership";
 import { incomeSchema } from "@/lib/validations/incomes";
 
 export type ActionResult = { error: string } | { success: true };
@@ -26,6 +27,13 @@ export async function createIncome(input: unknown): Promise<ActionResult> {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Não autenticado" };
+
+  if (
+    parsed.data.categoryId &&
+    !(await userOwnsRow(supabase, "categories", parsed.data.categoryId, user.id))
+  ) {
+    return { error: "Categoria inválida" };
+  }
 
   const { error } = await supabase
     .from("incomes")
@@ -52,6 +60,13 @@ export async function updateIncome(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Não autenticado" };
+
+  if (
+    parsed.data.categoryId &&
+    !(await userOwnsRow(supabase, "categories", parsed.data.categoryId, user.id))
+  ) {
+    return { error: "Categoria inválida" };
+  }
 
   const { error } = await supabase
     .from("incomes")

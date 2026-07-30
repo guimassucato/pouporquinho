@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { userOwnsRow } from "@/lib/supabase/ownership";
 import { expenseSchema } from "@/lib/validations/expenses";
 
 export type ActionResult = { error: string } | { success: true };
@@ -29,6 +30,13 @@ export async function createExpense(input: unknown): Promise<ActionResult> {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Não autenticado" };
 
+  if (
+    !(await userOwnsRow(supabase, "categories", parsed.data.categoryId, user.id)) ||
+    !(await userOwnsRow(supabase, "payment_methods", parsed.data.paymentMethodId, user.id))
+  ) {
+    return { error: "Categoria ou forma de pagamento inválida" };
+  }
+
   const { error } = await supabase
     .from("expenses")
     .insert({ ...toRow(parsed.data), user_id: user.id });
@@ -54,6 +62,13 @@ export async function updateExpense(
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { error: "Não autenticado" };
+
+  if (
+    !(await userOwnsRow(supabase, "categories", parsed.data.categoryId, user.id)) ||
+    !(await userOwnsRow(supabase, "payment_methods", parsed.data.paymentMethodId, user.id))
+  ) {
+    return { error: "Categoria ou forma de pagamento inválida" };
+  }
 
   const { error } = await supabase
     .from("expenses")

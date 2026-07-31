@@ -5,7 +5,7 @@ import type { Database } from "@/types/database.types";
 // means the row both exists and belongs to `userId`.
 export async function userOwnsRow(
   supabase: SupabaseClient<Database>,
-  table: "categories" | "payment_methods",
+  table: "categories" | "payment_methods" | "investments",
   id: string,
   userId: string
 ): Promise<boolean> {

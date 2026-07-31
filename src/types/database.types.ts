@@ -187,6 +187,173 @@ export type Database = {
           },
         ]
       }
+      index_rates: {
+        Row: {
+          annual_rate_percent: number
+          created_at: string
+          effective_from: string
+          id: string
+          indexador: string
+          user_id: string
+        }
+        Insert: {
+          annual_rate_percent: number
+          created_at?: string
+          effective_from: string
+          id?: string
+          indexador: string
+          user_id: string
+        }
+        Update: {
+          annual_rate_percent?: number
+          created_at?: string
+          effective_from?: string
+          id?: string
+          indexador?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      investment_transactions: {
+        Row: {
+          amount: number
+          created_at: string
+          generated_for_month: string | null
+          id: string
+          investment_id: string
+          notes: string | null
+          recurring_investment_contribution_id: string | null
+          transaction_date: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          generated_for_month?: string | null
+          id?: string
+          investment_id: string
+          notes?: string | null
+          recurring_investment_contribution_id?: string | null
+          transaction_date: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          generated_for_month?: string | null
+          id?: string
+          investment_id?: string
+          notes?: string | null
+          recurring_investment_contribution_id?: string | null
+          transaction_date?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_transactions_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "investment_transactions_recurring_investment_contribution__fkey"
+            columns: ["recurring_investment_contribution_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_investment_contributions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investment_valuations: {
+        Row: {
+          created_at: string
+          id: string
+          investment_id: string
+          notes: string | null
+          total_value: number
+          user_id: string
+          valuation_date: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          investment_id: string
+          notes?: string | null
+          total_value: number
+          user_id: string
+          valuation_date: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          investment_id?: string
+          notes?: string | null
+          total_value?: number
+          user_id?: string
+          valuation_date?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "investment_valuations_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      investments: {
+        Row: {
+          created_at: string
+          id: string
+          indexador: string | null
+          institution: string | null
+          is_archived: boolean
+          name: string
+          notes: string | null
+          rate_percent: number | null
+          start_date: string
+          ticker: string | null
+          type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          indexador?: string | null
+          institution?: string | null
+          is_archived?: boolean
+          name: string
+          notes?: string | null
+          rate_percent?: number | null
+          start_date: string
+          ticker?: string | null
+          type: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          indexador?: string | null
+          institution?: string | null
+          is_archived?: boolean
+          name?: string
+          notes?: string | null
+          rate_percent?: number | null
+          start_date?: string
+          ticker?: string | null
+          type?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       payment_methods: {
         Row: {
           closing_day: number | null
@@ -303,6 +470,50 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_investment_contributions: {
+        Row: {
+          amount: number
+          created_at: string
+          day_of_month: number
+          end_date: string | null
+          id: string
+          investment_id: string
+          is_active: boolean
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          created_at?: string
+          day_of_month: number
+          end_date?: string | null
+          id?: string
+          investment_id: string
+          is_active?: boolean
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          day_of_month?: number
+          end_date?: string | null
+          id?: string
+          investment_id?: string
+          is_active?: boolean
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_investment_contributions_investment_id_fkey"
+            columns: ["investment_id"]
+            isOneToOne: false
+            referencedRelation: "investments"
             referencedColumns: ["id"]
           },
         ]

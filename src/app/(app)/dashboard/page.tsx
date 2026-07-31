@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ensureRecurringExpensesForMonth } from "@/lib/finance/recurring";
+import { ensureRecurringInvestmentContributionsForMonth } from "@/lib/finance/investment-recurring";
 import { DashboardClient } from "./dashboard-client";
 
 function currentMonthIso() {
@@ -29,7 +30,10 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (user) {
     await ensureRecurringExpensesForMonth(supabase, user.id, month);
+    await ensureRecurringInvestmentContributionsForMonth(supabase, user.id, month);
   }
+
+  const asOfDate = new Date().toISOString().slice(0, 10);
 
   const [
     { data: categories },
@@ -38,6 +42,10 @@ export default async function DashboardPage() {
     { data: expensesByPaymentMethod },
     { data: cashflow },
     { data: budgets },
+    { data: investments },
+    { data: investmentTransactions },
+    { data: investmentValuations },
+    { data: indexRates },
   ] = await Promise.all([
     supabase.from("categories").select("*"),
     supabase.from("payment_methods").select("*"),
@@ -56,18 +64,28 @@ export default async function DashboardPage() {
       .lte("month", month)
       .order("month"),
     supabase.from("budgets").select("*").eq("month", month),
+    // Unfiltered by month - the compound-interest math needs full history.
+    supabase.from("investments").select("*").eq("is_archived", false),
+    supabase.from("investment_transactions").select("*"),
+    supabase.from("investment_valuations").select("*"),
+    supabase.from("index_rates").select("*"),
   ]);
 
   return (
     <DashboardClient
       month={month}
       trendMonths={trendMonths}
+      asOfDate={asOfDate}
       categories={categories ?? []}
       paymentMethods={paymentMethods ?? []}
       expensesByCategory={expensesByCategory ?? []}
       expensesByPaymentMethod={expensesByPaymentMethod ?? []}
       cashflow={cashflow ?? []}
       budgets={budgets ?? []}
+      investments={investments ?? []}
+      investmentTransactions={investmentTransactions ?? []}
+      investmentValuations={investmentValuations ?? []}
+      indexRates={indexRates ?? []}
     />
   );
 }

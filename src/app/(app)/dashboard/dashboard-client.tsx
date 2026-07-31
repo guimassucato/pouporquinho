@@ -11,7 +11,7 @@ import {
   XAxis,
   YAxis,
 } from "recharts";
-import { TrendingDown, TrendingUp, Wallet, PiggyBank } from "lucide-react";
+import { TrendingDown, TrendingUp, Wallet, PiggyBank, LineChart, Landmark } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
   ChartContainer,
@@ -24,12 +24,17 @@ import {
 import { PageHeader } from "@/components/layout/page-header";
 import { getPaymentMethodIcon } from "@/lib/finance/icons";
 import { formatCurrency, formatMonth } from "@/lib/finance/format";
+import { computePortfolioSummary } from "@/lib/finance/investment-portfolio";
 import { cn } from "@/lib/utils";
 import type { Tables } from "@/types/database.types";
 
 type Category = Tables<"categories">;
 type PaymentMethod = Tables<"payment_methods">;
 type Budget = Tables<"budgets">;
+type Investment = Tables<"investments">;
+type InvestmentTransaction = Tables<"investment_transactions">;
+type InvestmentValuation = Tables<"investment_valuations">;
+type IndexRate = Tables<"index_rates">;
 
 const cashflowConfig: ChartConfig = {
   income: {
@@ -51,21 +56,31 @@ function shortMonthLabel(monthIso: string) {
 export function DashboardClient({
   month,
   trendMonths,
+  asOfDate,
   categories,
   paymentMethods,
   expensesByCategory,
   expensesByPaymentMethod,
   cashflow,
   budgets,
+  investments,
+  investmentTransactions,
+  investmentValuations,
+  indexRates,
 }: {
   month: string;
   trendMonths: string[];
+  asOfDate: string;
   categories: Category[];
   paymentMethods: PaymentMethod[];
   expensesByCategory: { category_id: string | null; total: number | null }[];
   expensesByPaymentMethod: { payment_method_id: string | null; total: number | null }[];
   cashflow: { month: string | null; income_total: number | null; expense_total: number | null }[];
   budgets: Budget[];
+  investments: Investment[];
+  investmentTransactions: InvestmentTransaction[];
+  investmentValuations: InvestmentValuation[];
+  indexRates: IndexRate[];
 }) {
   const categoryById = useMemo(
     () => new Map(categories.map((c) => [c.id, c])),
@@ -80,6 +95,19 @@ export function DashboardClient({
   const currentCashflow = cashflow.find((c) => c.month === month);
   const totalIncome = currentCashflow?.income_total ?? 0;
   const balance = totalIncome - totalExpense;
+
+  const totalInvested = useMemo(
+    () =>
+      computePortfolioSummary(
+        investments,
+        investmentTransactions,
+        investmentValuations,
+        indexRates,
+        asOfDate
+      ).totalInvested,
+    [investments, investmentTransactions, investmentValuations, indexRates, asOfDate]
+  );
+  const totalNetWorth = balance + totalInvested;
 
   const topCategory = useMemo(() => {
     const sorted = [...expensesByCategory].sort(
@@ -193,6 +221,25 @@ export function DashboardClient({
             icon={PiggyBank}
           />
         )}
+      </div>
+
+      <div className="mb-6 grid gap-3 sm:grid-cols-3">
+        <StatCard
+          label="Saldo em conta"
+          value={formatCurrency(balance)}
+          icon={Wallet}
+          valueClassName={balance >= 0 ? "text-emerald-600 dark:text-emerald-400" : "text-destructive"}
+        />
+        <StatCard
+          label="Patrimônio investido"
+          value={formatCurrency(totalInvested)}
+          icon={LineChart}
+        />
+        <StatCard
+          label="Patrimônio total"
+          value={formatCurrency(totalNetWorth)}
+          icon={Landmark}
+        />
       </div>
 
       <div className="mb-6 grid gap-4 lg:grid-cols-2">

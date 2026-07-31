@@ -116,6 +116,11 @@ export function PaymentMethodFormDialog({
     });
   }
 
+  function onInvalid(formErrors: typeof errors) {
+    const message = Object.values(formErrors)[0]?.message;
+    toast.error(message ?? "Verifique os campos do formulário");
+  }
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
@@ -124,7 +129,7 @@ export function PaymentMethodFormDialog({
             {isEdit ? "Editar forma de pagamento" : "Nova forma de pagamento"}
           </DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit(onSubmit)} className="flex flex-col gap-4">
+        <form onSubmit={handleSubmit(onSubmit, onInvalid)} className="flex flex-col gap-4">
           <div className="flex flex-col gap-2">
             <Label htmlFor="name">Nome</Label>
             <Input id="name" placeholder="Ex: Nubank, Carteira..." {...register("name")} />
@@ -155,6 +160,9 @@ export function PaymentMethodFormDialog({
                 </Select>
               )}
             />
+            {errors.kind && (
+              <p className="text-sm text-destructive">{errors.kind.message}</p>
+            )}
           </div>
 
           {kind === "credit" && (
@@ -207,6 +215,9 @@ export function PaymentMethodFormDialog({
                 <ColorPicker value={field.value} onChange={field.onChange} />
               )}
             />
+            {errors.color && (
+              <p className="text-sm text-destructive">{errors.color.message}</p>
+            )}
           </div>
 
           <div className="flex flex-col gap-2">
@@ -222,6 +233,9 @@ export function PaymentMethodFormDialog({
                 />
               )}
             />
+            {errors.icon && (
+              <p className="text-sm text-destructive">{errors.icon.message}</p>
+            )}
           </div>
 
           <DialogFooter>

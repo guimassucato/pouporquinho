@@ -43,8 +43,10 @@ const KIND_LABELS: Record<PaymentMethodInput["kind"], string> = {
   other: "Outro",
 };
 
-function toNullableNumber(value: string): number | null {
-  return value === "" ? null : Number(value);
+function toNullableNumber(value: string | number | null | undefined): number | null {
+  if (value === "" || value === null || value === undefined) return null;
+  const num = Number(value);
+  return Number.isNaN(num) ? null : num;
 }
 
 const emptyDefaults: PaymentMethodInput = {

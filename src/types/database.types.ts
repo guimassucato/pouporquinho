@@ -155,8 +155,10 @@ export type Database = {
           category_id: string | null
           created_at: string
           description: string
+          generated_for_month: string | null
           id: string
           income_date: string
+          recurring_income_id: string | null
           user_id: string
         }
         Insert: {
@@ -164,8 +166,10 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description: string
+          generated_for_month?: string | null
           id?: string
           income_date: string
+          recurring_income_id?: string | null
           user_id: string
         }
         Update: {
@@ -173,8 +177,10 @@ export type Database = {
           category_id?: string | null
           created_at?: string
           description?: string
+          generated_for_month?: string | null
           id?: string
           income_date?: string
+          recurring_income_id?: string | null
           user_id?: string
         }
         Relationships: [
@@ -183,6 +189,13 @@ export type Database = {
             columns: ["category_id"]
             isOneToOne: false
             referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incomes_recurring_income_id_fkey"
+            columns: ["recurring_income_id"]
+            isOneToOne: false
+            referencedRelation: "recurring_incomes"
             referencedColumns: ["id"]
           },
         ]
@@ -470,6 +483,53 @@ export type Database = {
             columns: ["payment_method_id"]
             isOneToOne: false
             referencedRelation: "payment_methods"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      recurring_incomes: {
+        Row: {
+          amount: number
+          category_id: string | null
+          created_at: string
+          day_of_month: number
+          description: string
+          end_date: string | null
+          id: string
+          is_active: boolean
+          start_date: string
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          category_id?: string | null
+          created_at?: string
+          day_of_month: number
+          description: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          category_id?: string | null
+          created_at?: string
+          day_of_month?: number
+          description?: string
+          end_date?: string | null
+          id?: string
+          is_active?: boolean
+          start_date?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "recurring_incomes_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
             referencedColumns: ["id"]
           },
         ]

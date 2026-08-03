@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { ensureRecurringIncomesForMonth } from "@/lib/finance/income-recurring";
 import { IncomesClient } from "./incomes-client";
 
 function currentMonthIso() {
@@ -23,6 +24,13 @@ export default async function IncomesPage({
     : currentMonthIso();
 
   const supabase = await createClient();
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) {
+    await ensureRecurringIncomesForMonth(supabase, user.id, month);
+  }
 
   const [{ data: incomes }, { data: categories }] = await Promise.all([
     supabase

@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ensureRecurringExpensesForMonth } from "@/lib/finance/recurring";
+import { ensureRecurringIncomesForMonth } from "@/lib/finance/income-recurring";
 import { ensureRecurringInvestmentContributionsForMonth } from "@/lib/finance/investment-recurring";
 import { DashboardClient } from "./dashboard-client";
 
@@ -30,6 +31,7 @@ export default async function DashboardPage() {
   } = await supabase.auth.getUser();
   if (user) {
     await ensureRecurringExpensesForMonth(supabase, user.id, month);
+    await ensureRecurringIncomesForMonth(supabase, user.id, month);
     await ensureRecurringInvestmentContributionsForMonth(supabase, user.id, month);
   }
 

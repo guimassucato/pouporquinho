@@ -70,6 +70,8 @@ export function ImportClient({
   const [paymentMethodId, setPaymentMethodId] = useState(paymentMethods[0]?.id ?? "");
   const [referenceMonth, setReferenceMonth] = useState(monthOptions(1)[0].value);
   const [fileError, setFileError] = useState<string | null>(null);
+  const [needsPassword, setNeedsPassword] = useState(false);
+  const [password, setPassword] = useState("");
 
   const months = useMemo(() => monthOptions(24), []);
   const defaultCategoryId = categories[0]?.id ?? "";
@@ -81,14 +83,19 @@ export function ImportClient({
       return;
     }
     formData.set("referenceMonth", referenceMonth);
+    if (password) {
+      formData.set("password", password);
+    }
 
     startTransition(async () => {
       const result = await parseStatementPdf(formData);
       if ("error" in result) {
         setFileError(result.error);
+        setNeedsPassword(Boolean(result.needsPassword));
         return;
       }
 
+      setNeedsPassword(false);
       setRows(
         result.transactions.map((t: ParsedTransactionRow) => ({
           id: t.id,
@@ -208,6 +215,20 @@ export function ImportClient({
             <Label htmlFor="file">Arquivo PDF</Label>
             <Input id="file" name="file" type="file" accept="application/pdf" required />
           </div>
+
+          {needsPassword && (
+            <div className="flex flex-col gap-2">
+              <Label htmlFor="password">Senha do PDF</Label>
+              <Input
+                id="password"
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Digite a senha da fatura"
+                autoFocus
+              />
+            </div>
+          )}
 
           {fileError && <p className="text-sm text-destructive">{fileError}</p>}
 

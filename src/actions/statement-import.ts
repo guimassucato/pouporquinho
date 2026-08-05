@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { extractText, getDocumentProxy } from "unpdf";
+import { PasswordException, PasswordResponses } from "unpdf/pdfjs";
 import { createClient } from "@/lib/supabase/server";
 import { userOwnsRow } from "@/lib/supabase/ownership";
 import { parseStatementText, type ParsedTransaction } from "@/lib/finance/statement-parser";
@@ -14,7 +15,7 @@ const MAX_FILE_SIZE = 8 * 1024 * 1024; // 8MB
 export type ParsedTransactionRow = ParsedTransaction & { id: string };
 
 export type ParseStatementResult =
-  | { error: string }
+  | { error: string; needsPassword?: boolean }
   | { success: true; transactions: ParsedTransactionRow[] };
 
 export async function parseStatementPdf(formData: FormData): Promise<ParseStatementResult> {
@@ -26,6 +27,9 @@ export async function parseStatementPdf(formData: FormData): Promise<ParseStatem
 
   const file = formData.get("file");
   const referenceMonth = formData.get("referenceMonth");
+  const passwordField = formData.get("password");
+  const password =
+    typeof passwordField === "string" && passwordField.length > 0 ? passwordField : undefined;
 
   if (!(file instanceof File) || file.size === 0) {
     return { error: "Selecione um arquivo PDF" };
@@ -52,12 +56,18 @@ export async function parseStatementPdf(formData: FormData): Promise<ParseStatem
 
   let text: string;
   try {
-    const pdf = await getDocumentProxy(buffer);
+    const pdf = await getDocumentProxy(buffer, password ? { password } : undefined);
     const extracted = await extractText(pdf, { mergePages: true });
     text = extracted.text;
-  } catch {
+  } catch (err) {
+    if (err instanceof PasswordException) {
+      if (err.code === PasswordResponses.INCORRECT_PASSWORD) {
+        return { error: "Senha incorreta", needsPassword: true };
+      }
+      return { error: "Este PDF está protegido por senha", needsPassword: true };
+    }
     return {
-      error: "Não foi possível ler o PDF. Ele pode estar protegido por senha ou corrompido.",
+      error: "Não foi possível ler o PDF. Ele pode estar corrompido.",
     };
   }
 

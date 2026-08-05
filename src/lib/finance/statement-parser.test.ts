@@ -68,6 +68,43 @@ describe("parseStatementText", () => {
     expect(result[1].date).toBe("2026-01-03");
   });
 
+  it("extracts transactions from Banco Inter's 'DD de mês. AAAA' statement lines", () => {
+    const text = [
+      "07 de ago. 2026 Pagamento fatura anterior - + R$ 2.014,71",
+      "10 de ago. 2026 Anuidade cartão - R$ 10,00",
+      "14 de ago. 2026 Loja Exemplo (Parcela 07 de 10) - R$ 83,00",
+      "30 de ago. 2026 Uber* Trip BR - R$ 110,00",
+    ].join("\n");
+
+    const result = parseStatementText(text, "2026-08-01");
+
+    expect(result).toHaveLength(4);
+    expect(result[0]).toEqual({
+      date: "2026-08-07",
+      description: "Pagamento fatura anterior",
+      amount: 2014.71,
+      isLikelyPayment: true,
+    });
+    expect(result[1]).toEqual({
+      date: "2026-08-10",
+      description: "Anuidade cartão",
+      amount: 10,
+      isLikelyPayment: false,
+    });
+    expect(result[2]).toEqual({
+      date: "2026-08-14",
+      description: "Loja Exemplo (Parcela 07 de 10)",
+      amount: 83,
+      isLikelyPayment: false,
+    });
+    expect(result[3]).toEqual({
+      date: "2026-08-30",
+      description: "Uber* Trip BR",
+      amount: 110,
+      isLikelyPayment: false,
+    });
+  });
+
   it("returns an empty array for text with no matching lines", () => {
     expect(parseStatementText("no transactions here", "2026-01-01")).toEqual([]);
   });

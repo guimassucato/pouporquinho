@@ -3,7 +3,7 @@
 import { useMemo, useState, useTransition } from "react";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ChevronLeft, ChevronRight, Pencil, Plus, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, FileUp, Pencil, Plus, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -103,9 +103,14 @@ export function ExpensesClient({
         title="Despesas"
         description="Lançamento e histórico de despesas"
         actions={
-          <Button onClick={() => setDialogState({ open: true, expense: null })}>
-            <Plus /> Nova despesa
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" render={<Link href="/expenses/import" />}>
+              <FileUp /> Importar fatura
+            </Button>
+            <Button onClick={() => setDialogState({ open: true, expense: null })}>
+              <Plus /> Nova despesa
+            </Button>
+          </div>
         }
       />
 

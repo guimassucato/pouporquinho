@@ -1,6 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      // Credit card statement PDFs can exceed the 1MB default.
+      bodySizeLimit: "10mb",
+    },
+  },
   async headers() {
     return [
       {

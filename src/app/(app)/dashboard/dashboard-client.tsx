@@ -22,6 +22,7 @@ import {
   type ChartConfig,
 } from "@/components/ui/chart";
 import { PageHeader } from "@/components/layout/page-header";
+import { MonthNav } from "@/components/layout/month-nav";
 import { getPaymentMethodIcon } from "@/lib/finance/icons";
 import { formatCurrency, formatMonth } from "@/lib/finance/format";
 import { computePortfolioSummary } from "@/lib/finance/investment-portfolio";
@@ -180,6 +181,7 @@ export function DashboardClient({
       <PageHeader
         title="Dashboard"
         description={`Visão geral de ${formatMonth(month)}`}
+        actions={<MonthNav month={month} basePath="/dashboard" />}
       />
 
       <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

@@ -19,8 +19,15 @@ function monthsBack(monthIso: string, count: number) {
   return months;
 }
 
-export default async function DashboardPage() {
-  const month = currentMonthIso();
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ month?: string }>;
+}) {
+  const params = await searchParams;
+  const month = params.month && /^\d{4}-\d{2}-01$/.test(params.month)
+    ? params.month
+    : currentMonthIso();
   const trendMonths = monthsBack(month, 6);
   const earliestMonth = trendMonths[0];
 

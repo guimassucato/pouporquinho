@@ -11,13 +11,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { PageHeader } from "@/components/layout/page-header";
+import { ApiTokensCard, type ApiTokenRow } from "./api-tokens-card";
 
 export function SettingsClient({
   email,
   fullName,
+  apiTokens,
 }: {
   email: string;
   fullName: string;
+  apiTokens: ApiTokenRow[];
 }) {
   const [isPending, startTransition] = useTransition();
 
@@ -68,6 +71,10 @@ export function SettingsClient({
           </CardContent>
         </form>
       </Card>
+
+      <div className="mt-6">
+        <ApiTokensCard apiTokens={apiTokens} />
+      </div>
     </div>
   );
 }

@@ -40,3 +40,36 @@ function clampDayToMonth(day: number, monthStart: Date): number {
   ).getUTCDate();
   return Math.min(day, lastDayOfMonth);
 }
+
+/**
+ * The billing period of the invoice that closes in `closingMonthIso`
+ * ("YYYY-MM-01"): purchases from `start` through `closingDate` (inclusive),
+ * due on `dueDate`. Closing days past the end of a short month clamp to its
+ * last day, consistent with getInvoiceMonth.
+ */
+export function getInvoicePeriod(
+  closingMonthIso: string,
+  closingDay: number,
+  dueDay: number
+): { start: string; closingDate: string; dueDate: string } {
+  const toIso = (date: Date) => date.toISOString().slice(0, 10);
+  const closingDateOf = (monthStart: Date) => {
+    const date = new Date(monthStart);
+    date.setUTCDate(clampDayToMonth(closingDay, monthStart));
+    return date;
+  };
+
+  const monthStart = new Date(`${closingMonthIso.slice(0, 7)}-01T00:00:00Z`);
+  const closingDate = closingDateOf(monthStart);
+
+  const previousMonthStart = new Date(monthStart);
+  previousMonthStart.setUTCMonth(previousMonthStart.getUTCMonth() - 1);
+  const start = closingDateOf(previousMonthStart);
+  start.setUTCDate(start.getUTCDate() + 1);
+
+  return {
+    start: toIso(start),
+    closingDate: toIso(closingDate),
+    dueDate: toIso(getInvoiceMonth(closingDate, closingDay, dueDay).dueDate),
+  };
+}

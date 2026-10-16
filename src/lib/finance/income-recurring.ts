@@ -23,6 +23,7 @@ export async function ensureRecurringIncomesForMonth(
   const { data: recurring } = await supabase
     .from("recurring_incomes")
     .select("*")
+    .eq("user_id", userId)
     .eq("is_active", true)
     .lte("start_date", monthEnd)
     .or(`end_date.is.null,end_date.gte.${monthIso}`);
